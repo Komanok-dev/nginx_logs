@@ -52,6 +52,9 @@ Open terminal and run command:
 ## Api
 
 ```
-/api/swagger
-/api/logs
+admin/
+api/
+swagger/
+swagger.json/
+swagger.yaml/
 ```
