@@ -1,0 +1,39 @@
+services:
+  app:
+    build: .
+    container_name: nginx_logs
+    command: >
+      sh -c "
+      until nc -z db 5432; do
+        echo 'Waiting for the database...';
+        sleep 1;
+      done;
+      python manage.py migrate && \
+      python manage.py createsuperuser --username ${DJANGO_SUPERUSER_USERNAME} --email ${DJANGO_SUPERUSER_EMAIL} --noinput || true && \
+      python manage.py runserver 0.0.0.0:8000
+      "
+    volumes:
+      - ./nginx_logs:/app
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16.2
+    container_name: db
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    environment:
+      POSTGRES_DB: ${POSTGRES_NAME}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
